@@ -123,11 +123,14 @@ public class FileSystemSampleJSON
            Map<String, String> map = new LinkedHashMap<String, String>(4);
            map.put("address", "123 Fake Street");
            map.put("city", "Nowhere");
+           map.put("city", "Yeet");
            map.put("state", "Bliss");
            map.put("zip", "01010");
 
            jo.put("fulladdress", map);
            writeToFile(jsonFile, jo.toJSONString());
+           readFromFile(jsonFile);
+           System.out.println("Done running JSON Sample");
        }
        catch (FileNotFoundException e)
        {
