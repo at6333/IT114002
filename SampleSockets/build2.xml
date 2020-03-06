@@ -1,0 +1,49 @@
+<project name="testing" default="Main" basedir="."> 
+    <property name="src.dir" location="src" />
+    <property name="bin.dir" location="bin" />
+    <property name="lib.dir" location="lib" />
+
+    <path id="build.classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+
+    <target name="clean">
+        <delete dir="${bin.dir}" />
+    </target>
+
+    <target name="makedir">
+        <mkdir dir="${bin.dir}" />
+    </target>
+
+    <target name="compile" depends="clean, makedir">
+        <javac srcdir="${src.dir}" destdir="${bin.dir}" classpathref="build.classpath" />
+    </target>
+
+    <target name="buildServer" depends="compile">
+        <mkdir dir="make" />
+        <jar jarfile="make/SampleSocketServer.jar" basedir="${bin.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="SampleSocketServerPart5" />
+                <attribute name="Class-Path" value="build.classpath" />
+            </manifest>
+            <zipgroupfileset dir="${lib.dir}" includes="**/*.jar" />
+        </jar>
+    </target>
+
+    <target name="buildClient" depends="buildServer">
+        <jar jarfile="make/SampleSocketClient.jar" basedir="${bin.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="SampleSocketClientPart5"/>
+                <attribute name="Class-Path" value="build.classpath" />
+            </manifest>
+            <zipgroupfileset dir="${lib.dir}" includes="**/*.jar" />
+        </jar>
+    </target>
+
+    <target name="Main" depends="buildClient">
+        <description>Main target</description>
+    </target>
+
+</project>
