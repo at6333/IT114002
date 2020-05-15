@@ -16,19 +16,20 @@ public class TicTacToeClient extends JFrame
     private Square currentSquare;
     private static int PORT = 3005;
     private Socket server;
-    //private BufferedReader in;
-    //private PrintWriter out;
-    private ObjectInputStream in;
-    private ObjectOutputStream out;
+    private BufferedReader in;
+    private PrintWriter out;
+    //private ObjectInputStream in;
+    //private ObjectOutputStream out;
     public static int turn = 0;
 
-    public TicTacToeClient() throws Exception
+    public TicTacToeClient(String serverAddress) throws Exception
     {
-        //server = new Socket(serverAddress, PORT);
-        JPanel connection = createConnection();
-        frame.add(connection, BorderLayout.NORTH);
-        in = new ObjectInputStream(server.getInputStream());
-        out = new ObjectOutputStream(server.getOutputStream());
+        server = new Socket(serverAddress, PORT);
+        //JPanel connection = createConnection();
+        //frame.add(connection, BorderLayout.NORTH);
+        in = new BufferedReader(
+                new InputStreamReader(server.getInputStream()));
+        out = new PrintWriter(server.getOutputStream(), true);
 
         messageLabel.setBackground(Color.lightGray);
         frame.getContentPane().add(messageLabel, "South");
@@ -57,9 +58,9 @@ public class TicTacToeClient extends JFrame
                                     currentButton.setEnabled(false);
                                     turn++;
                                     currentSquare = board[j];
-                                    out.writeObject("MOVE " + j);
+                                    out.println("MOVE " + j);
                                 }
-                                catch (IOException ex)
+                                catch (Exception ex)
                                 {
                                     ex.printStackTrace();
                                 }
@@ -73,9 +74,9 @@ public class TicTacToeClient extends JFrame
                                     currentButton.setEnabled(false);
                                     turn++;
                                     currentSquare = board[j];
-                                    out.writeObject("MOVE " + j);
+                                    out.println("MOVE " + j);
                                 }
-                                catch (IOException ex)
+                                catch (Exception ex)
                                 {
                                     ex.printStackTrace();
                                 }
@@ -89,7 +90,7 @@ public class TicTacToeClient extends JFrame
         frame.getContentPane().add(boardPanel, "Center");
     }
 
-    public JPanel createConnection()
+    /*public JPanel createConnection()
     {
         JPanel connectionDetails = new JPanel();
         JTextField host = new JTextField();
@@ -133,14 +134,14 @@ public class TicTacToeClient extends JFrame
                 }); 
 
         return connectionDetails;
-    }
+    }*/
 
     public void play() throws Exception
     {
         String response;
         try
         {
-            response = (String)in.readObject();
+            response = in.readLine();
             if (response.startsWith("WELCOME"))
             {
                 char mark = response.charAt(0);
@@ -148,7 +149,7 @@ public class TicTacToeClient extends JFrame
             }
             while (true)
             {
-                response = (String)in.readObject();
+                response = in.readLine();
                 if (response.startsWith("VALID_MOVE"))
                 {
                     messageLabel.setText("Valid move, please wait");
@@ -180,7 +181,7 @@ public class TicTacToeClient extends JFrame
                     messageLabel.setText(response.substring(8));
                 }
             }
-            out.writeObject("QUIT");
+            out.println("QUIT");
         }
         finally
         {
@@ -216,7 +217,8 @@ public class TicTacToeClient extends JFrame
         {
             try
             {
-                TicTacToeClient client = new TicTacToeClient();
+                String serverAddress = (args.length == 0) ? "127.0.0.1" : args[1];
+                TicTacToeClient client = new TicTacToeClient(serverAddress);
                 client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 client.frame.setSize(600, 600);
                 client.frame.setVisible(true);
@@ -224,6 +226,7 @@ public class TicTacToeClient extends JFrame
                 client.play();
                 if (!client.wantsToPlayAgain())
                 {
+                    client.server.close();
                     break;
                 }
             }
