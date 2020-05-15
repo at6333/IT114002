@@ -7,7 +7,6 @@ public class TicTacToeServer
     public static boolean isRunning = true;
     public static long ClientID = 0;
     int port = 3005;
-    private List<ServerThread> clients = new ArrayList<ServerThread>();
 
     public synchronized long getNextId()
     {
@@ -47,17 +46,18 @@ public class TicTacToeServer
             {
                 try
                 {
-                    Socket client = serverSocket.accept();
-                    System.out.println("Client connecting...");
-                    ServerThread thread = new ServerThread(client, this);
-                    thread.start();
-                    thread.setClientId(getNextId());
-                    clients.add(thread);
-                    System.out.println("Client added to clients pool");
+                    Socket client1 = serverSocket.accept();
+                    Socket client2 = serverSocket.accept();
+                    //System.out.println("Client connecting...");
+                    //ServerThread thread = new ServerThread(client, this);
+                    //thread.start();
+                    //thread.setClientId(getNextId());
+                    //clients.add(thread);
+                    //System.out.println("Client added to clients pool");
 
                     Game game = new Game();
-                    Game.Player playerX = game.new Player(client, "X");
-                    Game.Player playerO = game.new Player(client, "O");
+                    Game.Player playerX = game.new Player(client1, "X");
+                    Game.Player playerO = game.new Player(client2, "O");
                     playerX.setOpponent(playerO);
                     playerO.setOpponent(playerX);
                     game.currentPlayer = playerX;
@@ -89,7 +89,7 @@ public class TicTacToeServer
         }
     }
 
-    @Deprecated
+    /*@Deprecated
     public int getClientIndexByThreadId(long id)
     {
         for (int i = 0, l = clients.size(); i < l; i++)
@@ -100,9 +100,9 @@ public class TicTacToeServer
             }
         }
         return -1;
-    }
+    }*/
 
-    public synchronized void broadcast(Payload payload, String name)
+    /*public synchronized void broadcast(Payload payload, String name)
     {
         String msg = payload.getMessage();
         payload.setMessage(
@@ -145,7 +145,7 @@ public class TicTacToeServer
         payload.setPayloadType(PayloadType.MESSAGE);
         payload.setMessage(message);
         broadcast(payload, id);
-    }
+    }*/
 
 }
 
@@ -212,7 +212,9 @@ class Game
                         new InputStreamReader(socket.getInputStream()));
                 output = new PrintWriter(socket.getOutputStream(), true);
                 output.println("WELCOME " + mark);
+                System.out.println("Welcome " + mark);
                 output.println("MESSAGE Waiting for opponent to connect");
+                System.out.println("Waiting for opponent to connect");
             }
             catch (IOException e)
             {
@@ -228,7 +230,10 @@ class Game
         public void otherPlayerMoved(int location)
         {
             output.println("OPPONENT_MOVED " + location);
+            System.out.println("Opponent moved " + location);
             output.println(
+                    hasWinner() ? "DEFEAT" : boardFilledUp() ? "TIE" : "");
+            System.out.println(
                     hasWinner() ? "DEFEAT" : boardFilledUp() ? "TIE" : "");
         }
 
@@ -237,11 +242,16 @@ class Game
             try
             {
                 output.println("MESSAGE All players connected");
+                System.out.println("All players connected");
                 if (mark.equalsIgnoreCase("X"))
                 {
                     output.println("MESSAGE Your move");
+                    System.out.println("Client 1 Your move\nClient 2 has next move");
                 }
-
+                else
+                {
+                    System.out.println("Client 2 Your move\nClient 1 has next move");
+                }
                 while (true)
                 {
                     String command = input.readLine();
@@ -258,6 +268,7 @@ class Game
                         else
                         {
                             output.println("MESSAGE ?");
+                            System.out.println("Move already made; move to unclaimed space");
                         }
                     }
                     else if (command.startsWith("QUIT"))

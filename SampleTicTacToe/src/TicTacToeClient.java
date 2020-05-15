@@ -7,8 +7,8 @@ import javax.swing.*;
 
 public class TicTacToeClient extends JFrame
 {
-    private Queue<Payload> toServer = new LinkedList<Payload>();
-    private Queue<Payload> fromServer = new LinkedList<Payload>();
+    //private Queue<Payload> toServer = new LinkedList<Payload>();
+    //private Queue<Payload> fromServer = new LinkedList<Payload>();
 
     private JFrame frame = new JFrame("Tic Tac Toe");
     private JLabel messageLabel = new JLabel("");
